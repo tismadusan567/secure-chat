@@ -1,0 +1,8 @@
+1. server start
+2. client join request -> dobije id
+poruke:
+1) join request
+2) spisak korisnika
+3) povezi se sa korisnikom
+4) posalji poruku korisniku
+
