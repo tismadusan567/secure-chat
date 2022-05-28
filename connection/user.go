@@ -27,7 +27,8 @@ func NewUser(address, port string) error {
 
 func GetUser(address, uid string) *User {
 	for _, us := range users {
-		if uid == string(us.ID) /* && address == us.Address */ {
+		fmt.Println(uid + "  " + string(us.ID))
+		if uid == string(us.ID) && address == us.Address {
 			return &us
 		}
 	}

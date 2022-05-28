@@ -10,8 +10,7 @@ import (
 var clientUID string
 
 func StartClient() {
-	clientUID := Join(ServerParams.ADDR, ServerParams.PORT).Payload
-	fmt.Printf("Online: %v\n\n", clientUID)
+	clientUID = Join(ServerParams.ADDR, ServerParams.PORT).Payload
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		scanner.Scan()
@@ -30,6 +29,7 @@ func Join(address, port string) *Message {
 
 // GetUsers get csv of ids of all clients in the network
 func GetUsers(address, port string) *Message {
+	fmt.Printf("Online: %v\n\n", clientUID)
 	return dial(address, port, USERS, clientUID)
 }
 
