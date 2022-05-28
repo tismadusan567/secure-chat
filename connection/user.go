@@ -2,37 +2,43 @@ package connection
 
 import (
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"os"
 )
 
 type User struct {
-	ID      int
+	ID      byte
 	Address string
 	Port    string
 }
 
 var users []User
 
-func newUser(address, port string) *User {
+func NewUser(address, port string) error {
+	if GetUser(address, port) != nil {
+		return errors.New("user already exists")
+	}
 	user := User{ID: ServerParams.ID, Address: address, Port: port}
 	ServerParams.ID++
-	return &user
+	users = append(users, user)
+	return nil
 }
 
-func addUser(user *User) {
-	users = append(users, *user)
-}
-
-func GetUser(address, port string) *User {
+func GetUser(address, uid string) *User {
 	for _, us := range users {
-		if address == us.Address {
+		if uid == string(us.ID) /* && address == us.Address */ {
 			return &us
 		}
 	}
-	u := newUser(address, port)
-	addUser(u)
-	return u
+	return nil
+}
+
+func GetUserIDs() (ids []byte) {
+	for i := range users {
+		ids = append(ids, users[i].ID)
+	}
+	return ids
 }
 
 func SaveUsers() error {

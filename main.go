@@ -7,16 +7,17 @@ import (
 )
 
 func main() {
+	connection.ServerParams.ADDR = "localhost"
+	connection.ServerParams.PORT = "4420"
+	connection.ServerParams.ID = '1'
 	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		scanner.Scan()
-		input := scanner.Text()
+	scanner.Scan()
+	input := scanner.Text()
 
-		switch {
-		case input == "server":
-			connection.StartServer()
-		case input == "client":
-			connection.StartClient()
-		}
+	switch input {
+	case "s":
+		connection.StartServer()
+	case "c":
+		connection.StartClient()
 	}
 }

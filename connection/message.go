@@ -26,7 +26,7 @@ func SendMessage(conn net.Conn, message Message) error {
 	return nil
 }
 
-func RecieveMessage(conn net.Conn) (Message, error) {
+func ReceiveMessage(conn net.Conn) (Message, error) {
 	decoder := gob.NewDecoder(conn)
 	response := Message{}
 	err := decoder.Decode(&response)

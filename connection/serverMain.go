@@ -7,14 +7,15 @@ import (
 )
 
 type serverParams struct {
-	ID int
+	ADDR string
+	PORT string
+	ID   byte
 }
 
 var ServerParams serverParams
 
 func StartServer() {
-	ServerParams.ID = 0
-	ln, err := net.Listen("tcp4", ":4420")
+	ln, err := net.Listen("tcp4", ":"+ServerParams.PORT)
 	if err != nil {
 		fmt.Errorf("StartListening error: %v", err)
 	}
@@ -30,9 +31,9 @@ func StartServer() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
-	message, err := RecieveMessage(conn)
+	message, err := ReceiveMessage(conn)
 	if err != nil {
-		panic("listener handleconnection RecieveMessage")
+		panic("listener handleconnection ReceiveMessage")
 	}
 	handleMessage(message, conn)
 }
@@ -42,26 +43,64 @@ func handleMessage(message Message, conn net.Conn) {
 	case JOIN:
 		handleJoin(message, conn)
 	case USERS:
-		fmt.Println("Handle sendfile")
+		handleUsers(message, conn)
 	case CONNECT:
 		fmt.Println("Handle requestfile")
 	case MESSAGE:
 		fmt.Println("Handle requestfile")
 	default:
-		fmt.Println("Invalid request")
+		handleInvalidRequest(conn, "Invalid request")
 	}
 }
 
-func handleJoin(message Message, conn net.Conn) {
+func getSenderAddress(conn net.Conn) (string, string) {
 	addr := conn.RemoteAddr().String()
-	ip := strings.TrimRight(addr, ":")
-	port := strings.TrimLeft(addr, ":")
-	GetUser(ip, port)
+	split := strings.Split(addr, ":")
+	ip := split[0]
+	port := split[1]
+	return ip, port
+}
 
-	response := NewMessage(TEST, "odg")
+func handleJoin(message Message, conn net.Conn) {
+	ip, port := getSenderAddress(conn)
+	er := NewUser(ip, port)
+	if er != nil {
+		fmt.Println(er)
+	}
+
+	response := NewMessage(JOINRESP, string(ServerParams.ID-1))
 	err := SendMessage(conn, response)
 	if err != nil {
-		fmt.Println(err)
-		panic("listener handlePing SendMessage")
+		fmt.Println("Server join response error")
+		return
+	}
+}
+
+func handleUsers(message Message, conn net.Conn) {
+	ip, _ := getSenderAddress(conn)
+	user := GetUser(ip, message.Payload)
+	if user == nil {
+		handleInvalidRequest(conn, "User not in network")
+		return
+	}
+	ids := GetUserIDs()
+	var sb strings.Builder
+	for i := range ids {
+		sb.WriteByte(ids[i])
+		sb.WriteByte(',')
+	}
+	response := NewMessage(USERSRESP, sb.String())
+	err := SendMessage(conn, response)
+	if err != nil {
+		fmt.Println("Server users response error")
+		return
+	}
+}
+
+func handleInvalidRequest(conn net.Conn, s string) {
+	response := NewMessage(INVALIDRESP, s)
+	err := SendMessage(conn, response)
+	if err != nil {
+		fmt.Println("Invalid response error")
 	}
 }
