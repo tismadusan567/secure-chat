@@ -73,7 +73,7 @@ func getSenderAddress(conn net.Conn) (string, string) {
 
 func handleJoin(message Message, conn net.Conn) {
 	ip, port := getSenderAddress(conn)
-	er := NewUser(ip, port, nil, message.PublicKey)
+	er := NewUser(ip, port, message.PublicKey)
 	if er != nil {
 		fmt.Println(er)
 	}
