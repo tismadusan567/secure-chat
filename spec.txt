@@ -1,14 +1,15 @@
-1. server start
-2. client join request -> dobije id
+1. server start ♥
+2. client join request -> dobije id ♥
 poruke:
-1) join request
-2) spisak korisnika
-3) povezi se sa korisnikom
+1) join request ♥
+2) spisak korisnika ♥
+3) povezi se sa korisnikom ♥
 4) posalji poruku korisniku
 
 
 to do
-- trajne konekcije
-- povezivanje korisnika
+- trajne konekcije ♥
+- povezivanje korisnika ♥
+- chat
 - log out
 

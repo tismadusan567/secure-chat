@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 )
 
 type userParams struct {
-	clientUID int
-	privKey   *rsa.PrivateKey
-	pubKey    *rsa.PublicKey
-	conn      net.Conn
+	clientUID  int
+	privKey    *rsa.PrivateKey
+	pubKey     *rsa.PublicKey
+	conn       net.Conn
+	friendList map[int]rsa.PublicKey
 }
 
 var UserParams userParams
@@ -20,6 +22,7 @@ var UserParams userParams
 func initClient() {
 	UserParams.privKey, UserParams.pubKey = GenerateKeyPair(2048)
 	UserParams.clientUID = Join(GServerAddr, GServerPort).UID
+	UserParams.friendList = make(map[int]rsa.PublicKey)
 }
 
 func StartClient() {
@@ -29,8 +32,12 @@ func StartClient() {
 		scanner.Scan()
 		input := scanner.Text()
 		switch input {
-		case "users":
-			fmt.Println(*GetUsers())
+		case "us":
+			GetUsers()
+		case "con":
+			scanner.Scan()
+			input := scanner.Text()
+			Connect(input)
 		}
 	}
 }
@@ -45,14 +52,41 @@ func Join(address, port string) *Message {
 	}
 	UserParams.conn = conn
 
-	message := Message{Header: JOIN, PublicKey: *UserParams.pubKey}
+	message := Message{
+		Header:    JOIN,
+		PublicKey: *UserParams.pubKey,
+	}
 	return transceive(message)
 }
 
 // GetUsers get csv of ids of all clients in the network
-func GetUsers() *Message {
-	message := Message{Header: USERS, UID: UserParams.clientUID}
-	return transceive(message)
+func GetUsers() {
+	message := Message{
+		Header: USERS,
+		UID:    UserParams.clientUID,
+	}
+	fmt.Println(*transceive(message))
+}
+
+func Connect(id string) {
+	idNum, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if idNum == UserParams.clientUID {
+		fmt.Println("cannot connect to oneself")
+		return
+	}
+
+	message := Message{
+		Header:  CONNECT,
+		UID:     UserParams.clientUID,
+		Payload: id,
+	}
+	otherPubKey := transceive(message).PublicKey
+	UserParams.friendList[idNum] = otherPubKey
+	fmt.Println(otherPubKey)
 }
 
 func transceive(message Message) *Message {

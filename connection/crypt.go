@@ -12,6 +12,7 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey) {
 	privkey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		fmt.Println(err)
+		return nil, nil
 	}
 	return privkey, &privkey.PublicKey
 }
@@ -22,6 +23,7 @@ func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) []byte {
 	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, pub, msg, nil)
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
 	return ciphertext
 }

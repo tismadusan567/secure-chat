@@ -3,6 +3,7 @@ package connection
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -21,12 +22,14 @@ func StartServer() {
 	ln, err := net.Listen("tcp4", ":"+GServerPort)
 	if err != nil {
 		fmt.Errorf("StartListening error: %v", err)
+		return
 	}
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			fmt.Errorf("greska pri prihvatanju konekcije: %v", err)
+			continue
 		}
 		go handleConnection(conn)
 	}
@@ -36,7 +39,8 @@ func handleConnection(conn net.Conn) {
 	for {
 		message, err := ReceiveMessage(conn)
 		if err != nil {
-			panic("listener handleconnection ReceiveMessage")
+			fmt.Println("listener handleconnection ReceiveMessage")
+			return
 		}
 		handleMessage(message, conn)
 	}
@@ -49,7 +53,7 @@ func handleMessage(message Message, conn net.Conn) {
 	case USERS:
 		handleUsers(message, conn)
 	case CONNECT:
-		fmt.Println("Handle requestfile")
+		handleConnect(message, conn)
 	case MESSAGE:
 		fmt.Println("Handle requestfile")
 	default:
@@ -81,12 +85,12 @@ func handleJoin(message Message, conn net.Conn) {
 }
 
 func handleUsers(message Message, conn net.Conn) {
-	ip, _ := getSenderAddress(conn)
-	user := GetUser(ip, message.UID)
+	user := GetUser(message.UID)
 	if user == nil {
 		handleInvalidRequest(conn, "User not in network")
 		return
 	}
+	fmt.Println(message)
 	ids := GetUserIDs()
 	var sb strings.Builder
 	for i := range ids {
@@ -97,6 +101,32 @@ func handleUsers(message Message, conn net.Conn) {
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Server users response error")
+		return
+	}
+}
+
+func handleConnect(message Message, conn net.Conn) {
+	user := GetUser(message.UID)
+	if user == nil {
+		handleInvalidRequest(conn, "User not in network")
+		return
+	}
+
+	id, err := strconv.Atoi(message.Payload)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	otherUser := GetUser(id)
+	if otherUser == nil {
+		handleInvalidRequest(conn, "Other user not in network")
+		return
+	}
+	pubKey := otherUser.PublicKey
+	response := Message{Header: CONNECTRESP, PublicKey: pubKey}
+	err = SendMessage(conn, response)
+	if err != nil {
+		fmt.Println("Invalid response error")
 		return
 	}
 }
