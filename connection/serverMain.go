@@ -68,7 +68,7 @@ func handleJoin(message Message, conn net.Conn) {
 		fmt.Println(er)
 	}
 
-	response := NewMessage(JOINRESP, string(ServerParams.ID-1))
+	response := Message{Header: JOINRESP, Payload: string(ServerParams.ID - 1)}
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Server join response error")
@@ -89,7 +89,7 @@ func handleUsers(message Message, conn net.Conn) {
 		sb.WriteByte(ids[i])
 		sb.WriteByte(',')
 	}
-	response := NewMessage(USERSRESP, sb.String())
+	response := Message{Header: USERSRESP, Payload: sb.String()}
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Server users response error")
@@ -98,7 +98,7 @@ func handleUsers(message Message, conn net.Conn) {
 }
 
 func handleInvalidRequest(conn net.Conn, s string) {
-	response := NewMessage(INVALIDRESP, s)
+	response := Message{Header: INVALIDRESP, Payload: s}
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Invalid response error")

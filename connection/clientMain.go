@@ -2,14 +2,18 @@ package connection
 
 import (
 	"bufio"
+	"crypto/rsa"
 	"fmt"
 	"net"
 	"os"
 )
 
 var clientUID string
+var privKey *rsa.PrivateKey
+var pubKey *rsa.PublicKey
 
 func StartClient() {
+	privKey, pubKey = GenerateKeyPair(2048)
 	clientUID = Join(ServerParams.ADDR, ServerParams.PORT).Payload
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -24,16 +28,17 @@ func StartClient() {
 
 // Join get unique user ID
 func Join(address, port string) *Message {
-	return dial(address, port, JOIN, "")
+	message := Message{Header: JOIN, PublicKey: *pubKey}
+	return dial(address, port, message)
 }
 
 // GetUsers get csv of ids of all clients in the network
 func GetUsers(address, port string) *Message {
-	fmt.Printf("Online: %v\n\n", clientUID)
-	return dial(address, port, USERS, clientUID)
+	message := Message{Header: USERS, Payload: clientUID}
+	return dial(address, port, message)
 }
 
-func dial(address, port string, header Request, payload string) *Message {
+func dial(address, port string, message Message) *Message {
 	// dial
 	conn, err := net.Dial("tcp4", address+":"+port)
 	if err != nil {
@@ -43,8 +48,6 @@ func dial(address, port string, header Request, payload string) *Message {
 	defer conn.Close()
 
 	// send msg
-	fmt.Println(conn.LocalAddr().String())
-	message := NewMessage(header, payload)
 	err = SendMessage(conn, message)
 	if err != nil {
 		fmt.Println("send message error")

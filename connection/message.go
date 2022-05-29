@@ -1,19 +1,16 @@
 package connection
 
 import (
+	"crypto/rsa"
 	"encoding/gob"
 	"fmt"
 	"net"
 )
 
 type Message struct {
-	Header  Request
-	Payload string
-}
-
-func NewMessage(request Request, data string) Message {
-	message := Message{Header: request, Payload: data}
-	return message
+	Header    Request
+	Payload   string
+	PublicKey rsa.PublicKey
 }
 
 func SendMessage(conn net.Conn, message Message) error {
