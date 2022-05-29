@@ -6,9 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="1ca6645e-ac8c-4870-845f-0b310e1ed997" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connection/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/connection/message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connection/clientMain.go" beforeDir="false" afterPath="$PROJECT_DIR$/connection/clientMain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connection/requests.go" beforeDir="false" afterPath="$PROJECT_DIR$/connection/constants.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connection/serverMain.go" beforeDir="false" afterPath="$PROJECT_DIR$/connection/serverMain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/connection/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/connection/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec.txt" beforeDir="false" afterPath="$PROJECT_DIR$/spec.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

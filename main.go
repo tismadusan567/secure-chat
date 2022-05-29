@@ -7,9 +7,6 @@ import (
 )
 
 func main() {
-	connection.ServerParams.ADDR = "localhost"
-	connection.ServerParams.PORT = "4420"
-	connection.ServerParams.ID = '1'
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	input := scanner.Text()

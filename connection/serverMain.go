@@ -7,15 +7,18 @@ import (
 )
 
 type serverParams struct {
-	ADDR string
-	PORT string
-	ID   int
+	ID int
 }
 
 var ServerParams serverParams
 
+func initServer() {
+	ServerParams.ID = 1
+}
+
 func StartServer() {
-	ln, err := net.Listen("tcp4", ":"+ServerParams.PORT)
+	initServer()
+	ln, err := net.Listen("tcp4", ":"+GServerPort)
 	if err != nil {
 		fmt.Errorf("StartListening error: %v", err)
 	}
@@ -30,12 +33,13 @@ func StartServer() {
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-	message, err := ReceiveMessage(conn)
-	if err != nil {
-		panic("listener handleconnection ReceiveMessage")
+	for {
+		message, err := ReceiveMessage(conn)
+		if err != nil {
+			panic("listener handleconnection ReceiveMessage")
+		}
+		handleMessage(message, conn)
 	}
-	handleMessage(message, conn)
 }
 
 func handleMessage(message Message, conn net.Conn) {
@@ -68,7 +72,7 @@ func handleJoin(message Message, conn net.Conn) {
 		fmt.Println(er)
 	}
 
-	response := Message{Header: JOINRESP, Payload: string(ServerParams.ID - 1)}
+	response := Message{Header: JOINRESP, UID: ServerParams.ID - 1}
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Server join response error")
@@ -78,7 +82,7 @@ func handleJoin(message Message, conn net.Conn) {
 
 func handleUsers(message Message, conn net.Conn) {
 	ip, _ := getSenderAddress(conn)
-	user := GetUser(ip, message.Payload)
+	user := GetUser(ip, message.UID)
 	if user == nil {
 		handleInvalidRequest(conn, "User not in network")
 		return
@@ -86,7 +90,7 @@ func handleUsers(message Message, conn net.Conn) {
 	ids := GetUserIDs()
 	var sb strings.Builder
 	for i := range ids {
-		sb.WriteRune(rune(ids[i]))
+		sb.WriteRune(rune(ids[i] + '0'))
 		sb.WriteByte(',')
 	}
 	response := Message{Header: USERSRESP, Payload: sb.String()}

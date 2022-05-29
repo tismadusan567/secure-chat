@@ -10,4 +10,5 @@ poruke:
 to do
 - trajne konekcije
 - povezivanje korisnika
+- log out
 

@@ -31,10 +31,9 @@ func NewUser(address, port string, conn net.Conn, pubKey rsa.PublicKey) error {
 	return nil
 }
 
-func GetUser(address, uid string) *User {
+func GetUser(address string, uid int) *User {
 	for _, us := range users {
-		fmt.Println(uid + "  " + string(us.ID))
-		if uid == string(us.ID) && address == us.Address {
+		if uid == us.ID && address == us.Address {
 			return &us
 		}
 	}
