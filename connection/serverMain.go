@@ -50,12 +50,14 @@ func handleMessage(message Message, conn net.Conn) {
 	switch message.Header {
 	case JOIN:
 		handleJoin(message, conn)
+	case ESTABLISH:
+		handleEstablish(message, conn)
 	case USERS:
 		handleUsers(message, conn)
 	case CONNECT:
 		handleConnect(message, conn)
 	case MESSAGE:
-		fmt.Println("Handle requestfile")
+		handleSend(message, conn)
 	default:
 		handleInvalidRequest(conn, "Invalid request")
 	}
@@ -71,7 +73,7 @@ func getSenderAddress(conn net.Conn) (string, string) {
 
 func handleJoin(message Message, conn net.Conn) {
 	ip, port := getSenderAddress(conn)
-	er := NewUser(ip, port, conn, message.PublicKey)
+	er := NewUser(ip, port, nil, message.PublicKey)
 	if er != nil {
 		fmt.Println(er)
 	}
@@ -84,13 +86,25 @@ func handleJoin(message Message, conn net.Conn) {
 	}
 }
 
+func handleEstablish(message Message, conn net.Conn) {
+	user := GetUser(message.UID)
+	user.Connection = conn
+	response := Message{
+		Header: ESTABLISHRESP,
+	}
+	err := SendMessage(conn, response)
+	if err != nil {
+		fmt.Println("Server establish response error")
+		return
+	}
+}
+
 func handleUsers(message Message, conn net.Conn) {
 	user := GetUser(message.UID)
 	if user == nil {
 		handleInvalidRequest(conn, "User not in network")
 		return
 	}
-	fmt.Println(message)
 	ids := GetUserIDs()
 	var sb strings.Builder
 	for i := range ids {
@@ -124,6 +138,39 @@ func handleConnect(message Message, conn net.Conn) {
 	}
 	pubKey := otherUser.PublicKey
 	response := Message{Header: CONNECTRESP, PublicKey: pubKey}
+	err = SendMessage(conn, response)
+	if err != nil {
+		fmt.Println("Invalid response error")
+		return
+	}
+}
+
+func handleSend(message Message, conn net.Conn) {
+	user := GetUser(message.UID)
+	if user == nil {
+		handleInvalidRequest(conn, "User not in network")
+		return
+	}
+	id := message.PublicKey.E // EVIL
+	otherUser := GetUser(id)
+	if otherUser == nil {
+		handleInvalidRequest(conn, "Other user not in network")
+		return
+	}
+	forwardMessage := Message{
+		Header:  FORWARD,
+		UID:     message.UID,
+		Payload: message.Payload,
+	}
+	err := SendMessage(otherUser.Connection, forwardMessage)
+	if err != nil {
+		handleInvalidRequest(conn, "Message not sent")
+		return
+	}
+	response := Message{
+		Header:  MESSAGERESP,
+		Payload: "Message sent",
+	}
 	err = SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("Invalid response error")

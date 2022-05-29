@@ -20,11 +20,10 @@ var users []User
 
 func NewUser(address, port string, conn net.Conn, pubKey rsa.PublicKey) error {
 	user := User{
-		ID:         ServerParams.ID,
-		Address:    address,
-		Port:       port,
-		PublicKey:  pubKey,
-		Connection: conn,
+		ID:        ServerParams.ID,
+		Address:   address,
+		Port:      port,
+		PublicKey: pubKey,
 	}
 	ServerParams.ID++
 	users = append(users, user)
@@ -32,9 +31,9 @@ func NewUser(address, port string, conn net.Conn, pubKey rsa.PublicKey) error {
 }
 
 func GetUser(uid int) *User {
-	for _, us := range users {
+	for i, us := range users {
 		if uid == us.ID {
-			return &us
+			return &users[i]
 		}
 	}
 	return nil

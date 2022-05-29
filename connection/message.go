@@ -3,7 +3,6 @@ package connection
 import (
 	"crypto/rsa"
 	"encoding/gob"
-	"fmt"
 	"net"
 )
 
@@ -20,7 +19,7 @@ func SendMessage(conn net.Conn, message Message) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Sending " + message.Payload)
+	//fmt.Println("Sending " + message.Payload)
 	return nil
 }
 
@@ -31,6 +30,6 @@ func ReceiveMessage(conn net.Conn) (Message, error) {
 	if err != nil {
 		return Message{}, err
 	}
-	fmt.Printf("Recieved : %+v\n", response)
+	//fmt.Println("Recieved" + response)
 	return response, nil
 }
