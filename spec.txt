@@ -6,3 +6,8 @@ poruke:
 3) povezi se sa korisnikom
 4) posalji poruku korisniku
 
+
+to do
+- trajne konekcije
+- povezivanje korisnika
+

@@ -9,7 +9,7 @@ import (
 type serverParams struct {
 	ADDR string
 	PORT string
-	ID   byte
+	ID   int
 }
 
 var ServerParams serverParams
@@ -63,7 +63,7 @@ func getSenderAddress(conn net.Conn) (string, string) {
 
 func handleJoin(message Message, conn net.Conn) {
 	ip, port := getSenderAddress(conn)
-	er := NewUser(ip, port)
+	er := NewUser(ip, port, conn, message.PublicKey)
 	if er != nil {
 		fmt.Println(er)
 	}
@@ -86,7 +86,7 @@ func handleUsers(message Message, conn net.Conn) {
 	ids := GetUserIDs()
 	var sb strings.Builder
 	for i := range ids {
-		sb.WriteByte(ids[i])
+		sb.WriteRune(rune(ids[i]))
 		sb.WriteByte(',')
 	}
 	response := Message{Header: USERSRESP, Payload: sb.String()}

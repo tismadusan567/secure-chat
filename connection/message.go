@@ -9,8 +9,9 @@ import (
 
 type Message struct {
 	Header    Request
-	Payload   string
 	PublicKey rsa.PublicKey
+	UID       int
+	Payload   string
 }
 
 func SendMessage(conn net.Conn, message Message) error {
