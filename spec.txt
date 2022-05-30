@@ -4,12 +4,12 @@ poruke:
 1) join request ♥
 2) spisak korisnika ♥
 3) povezi se sa korisnikom ♥
-4) posalji poruku korisniku
+4) posalji poruku korisniku ♥
 
 
 to do
 - trajne konekcije ♥
 - povezivanje korisnika ♥
-- chat
-- log out
+- chat ♥
+- log out ♥
 
