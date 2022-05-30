@@ -1,5 +1,7 @@
 package connection
 
+import "fmt"
+
 type Request string
 
 const GServerAddr = "localhost"
@@ -23,3 +25,7 @@ const (
 	INVALIDRESP   = "invalidresp"
 	TESTRESP      = "testresp"
 )
+
+func PrintPadding() {
+	fmt.Println("--------------------------")
+}
