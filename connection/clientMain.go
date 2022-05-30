@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type userParams struct {
@@ -20,11 +21,17 @@ type userParams struct {
 
 var UserParams userParams
 
+func printPadding() {
+	fmt.Println("--------------------------")
+}
+
 func initClient() {
 	UserParams.privKey, UserParams.pubKey = GenerateKeyPair(2048)
 	if Join(GServerAddr, GServerPort).Header == INVALIDRESP {
 		panic("connection failed")
 	}
+	fmt.Println("Joined server with id:", UserParams.clientUID)
+	printPadding()
 	UserParams.friendList = make(map[int]rsa.PublicKey)
 }
 
@@ -38,7 +45,9 @@ func listenMessages() {
 		cipherBytes := []byte(message.Payload)
 		messageBytes := DecryptWithPrivateKey(cipherBytes, UserParams.privKey)
 		msg := string(messageBytes)
+		fmt.Println("Received message from user", message.UID)
 		fmt.Println(msg)
+		printPadding()
 	}
 }
 
@@ -51,9 +60,9 @@ func StartClient() {
 		scanner.Scan()
 		input := scanner.Text()
 		switch input {
-		case "user":
+		case "users":
 			GetUsers()
-		case "con":
+		case "conn":
 			scanner.Scan()
 			otherID := scanner.Text()
 			Connect(otherID)
@@ -69,7 +78,7 @@ func StartClient() {
 
 // Join get unique user ID
 func Join(address, port string) *Message {
-	// dial
+	// establish send connection to server
 	conn, err := net.Dial("tcp4", address+":"+port)
 	if err != nil {
 		fmt.Println("dial error")
@@ -83,7 +92,7 @@ func Join(address, port string) *Message {
 	}
 	UserParams.clientUID = transceive(message).UID
 
-	// create receiving connection
+	// establish receiving connection
 	UserParams.recConn, err = net.Dial("tcp4", address+":"+port)
 	if err != nil {
 		fmt.Println("dial error")
@@ -97,6 +106,7 @@ func Join(address, port string) *Message {
 	err = SendMessage(UserParams.recConn, message2)
 	if err != nil {
 		fmt.Println("send message error")
+		printPadding()
 		return nil
 	}
 
@@ -104,6 +114,7 @@ func Join(address, port string) *Message {
 	response, err := ReceiveMessage(UserParams.recConn)
 	if err != nil {
 		fmt.Println("recv message error")
+		printPadding()
 		return nil
 	}
 	return &response
@@ -115,7 +126,14 @@ func GetUsers() {
 		Header: USERS,
 		UID:    UserParams.clientUID,
 	}
-	fmt.Println(*transceive(message))
+	response := transceive(message)
+	split := strings.Split(response.Payload, ",")
+	fmt.Println("List of online users:")
+	for i := range split {
+		fmt.Printf("%s ", split[i])
+	}
+	fmt.Printf("\n")
+	printPadding()
 }
 
 func Connect(otherID string) {
@@ -126,6 +144,7 @@ func Connect(otherID string) {
 	}
 	if idNum == UserParams.clientUID {
 		fmt.Println("cannot connect to oneself")
+		printPadding()
 		return
 	}
 
@@ -139,6 +158,8 @@ func Connect(otherID string) {
 		fmt.Println(response.Payload)
 		return
 	}
+	fmt.Println("Connection successful")
+	printPadding()
 	otherPubKey := response.PublicKey
 	UserParams.friendList[idNum] = otherPubKey
 }
@@ -151,10 +172,12 @@ func Send(otherID string, msg string) {
 	}
 	if idNum == UserParams.clientUID {
 		fmt.Println("cannot send to oneself")
+		printPadding()
 		return
 	}
 	if _, ok := UserParams.friendList[idNum]; !ok {
 		fmt.Println("user not in friend list")
+		printPadding()
 		return
 	}
 
@@ -169,6 +192,7 @@ func Send(otherID string, msg string) {
 	}
 	response := transceive(message)
 	fmt.Println(response.Payload)
+	printPadding()
 }
 
 func transceive(message Message) *Message {
@@ -176,6 +200,7 @@ func transceive(message Message) *Message {
 	err := SendMessage(UserParams.conn, message)
 	if err != nil {
 		fmt.Println("send message error")
+		printPadding()
 		return nil
 	}
 
@@ -183,6 +208,7 @@ func transceive(message Message) *Message {
 	response, err := ReceiveMessage(UserParams.conn)
 	if err != nil {
 		fmt.Println("recv message error")
+		printPadding()
 		return nil
 	}
 	return &response

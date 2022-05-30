@@ -21,14 +21,14 @@ func StartServer() {
 	initServer()
 	ln, err := net.Listen("tcp4", ":"+GServerPort)
 	if err != nil {
-		fmt.Errorf("StartListening error: %v", err)
+		fmt.Printf("startListening error: %v", err)
 		return
 	}
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Errorf("greska pri prihvatanju konekcije: %v", err)
+			fmt.Printf("connection accept error: %v", err)
 			continue
 		}
 		go handleConnection(conn)
@@ -39,7 +39,7 @@ func handleConnection(conn net.Conn) {
 	for {
 		message, err := ReceiveMessage(conn)
 		if err != nil {
-			fmt.Println("listener handleconnection ReceiveMessage")
+			fmt.Println("connection closed")
 			return
 		}
 		handleMessage(message, conn)
@@ -59,7 +59,7 @@ func handleMessage(message Message, conn net.Conn) {
 	case MESSAGE:
 		handleSend(message, conn)
 	default:
-		handleInvalidRequest(conn, "Invalid request")
+		handleInvalidRequest(conn, "invalid request")
 	}
 }
 
@@ -73,15 +73,11 @@ func getSenderAddress(conn net.Conn) (string, string) {
 
 func handleJoin(message Message, conn net.Conn) {
 	ip, port := getSenderAddress(conn)
-	er := NewUser(ip, port, message.PublicKey)
-	if er != nil {
-		fmt.Println(er)
-	}
-
+	NewUser(ip, port, message.PublicKey)
 	response := Message{Header: JOINRESP, UID: ServerParams.ID - 1}
 	err := SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Server join response error")
+		fmt.Println("server join response error")
 		return
 	}
 }
@@ -94,7 +90,7 @@ func handleEstablish(message Message, conn net.Conn) {
 	}
 	err := SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Server establish response error")
+		fmt.Println("server establish response error")
 		return
 	}
 }
@@ -114,7 +110,7 @@ func handleUsers(message Message, conn net.Conn) {
 	response := Message{Header: USERSRESP, Payload: sb.String()}
 	err := SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Server users response error")
+		fmt.Println("server users response error")
 		return
 	}
 }
@@ -122,7 +118,7 @@ func handleUsers(message Message, conn net.Conn) {
 func handleConnect(message Message, conn net.Conn) {
 	user := GetUser(message.UID)
 	if user == nil {
-		handleInvalidRequest(conn, "User not in network")
+		handleInvalidRequest(conn, "user not in network")
 		return
 	}
 
@@ -133,14 +129,14 @@ func handleConnect(message Message, conn net.Conn) {
 	}
 	otherUser := GetUser(id)
 	if otherUser == nil {
-		handleInvalidRequest(conn, "Other user not in network")
+		handleInvalidRequest(conn, "other user not in network")
 		return
 	}
 	pubKey := otherUser.PublicKey
 	response := Message{Header: CONNECTRESP, PublicKey: pubKey}
 	err = SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Invalid response error")
+		fmt.Println("invalid response error")
 		return
 	}
 }
@@ -148,13 +144,13 @@ func handleConnect(message Message, conn net.Conn) {
 func handleSend(message Message, conn net.Conn) {
 	user := GetUser(message.UID)
 	if user == nil {
-		handleInvalidRequest(conn, "User not in network")
+		handleInvalidRequest(conn, "user not in network")
 		return
 	}
 	id := message.PublicKey.E // EVIL
 	otherUser := GetUser(id)
 	if otherUser == nil {
-		handleInvalidRequest(conn, "Other user not in network")
+		handleInvalidRequest(conn, "other user not in network")
 		return
 	}
 	forwardMessage := Message{
@@ -164,7 +160,7 @@ func handleSend(message Message, conn net.Conn) {
 	}
 	err := SendMessage(otherUser.Connection, forwardMessage)
 	if err != nil {
-		handleInvalidRequest(conn, "Message not sent")
+		handleInvalidRequest(conn, "message not sent")
 		return
 	}
 	response := Message{
@@ -173,7 +169,7 @@ func handleSend(message Message, conn net.Conn) {
 	}
 	err = SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Invalid response error")
+		fmt.Println("invalid response error")
 		return
 	}
 }
@@ -182,6 +178,6 @@ func handleInvalidRequest(conn net.Conn, s string) {
 	response := Message{Header: INVALIDRESP, Payload: s}
 	err := SendMessage(conn, response)
 	if err != nil {
-		fmt.Println("Invalid response error")
+		fmt.Println("invalid response error")
 	}
 }

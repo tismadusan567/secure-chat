@@ -19,7 +19,6 @@ func SendMessage(conn net.Conn, message Message) error {
 	if err != nil {
 		return err
 	}
-	//fmt.Println("Sending " + message.Payload)
 	return nil
 }
 
@@ -30,6 +29,5 @@ func ReceiveMessage(conn net.Conn) (Message, error) {
 	if err != nil {
 		return Message{}, err
 	}
-	//fmt.Println("Recieved" + response)
 	return response, nil
 }

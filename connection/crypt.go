@@ -34,6 +34,7 @@ func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) []byte {
 	plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
 	return plaintext
 }

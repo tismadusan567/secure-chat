@@ -15,7 +15,7 @@ type User struct {
 
 var users []User
 
-func NewUser(address, port string, pubKey rsa.PublicKey) error {
+func NewUser(address, port string, pubKey rsa.PublicKey) {
 	user := User{
 		ID:        ServerParams.ID,
 		Address:   address,
@@ -24,7 +24,6 @@ func NewUser(address, port string, pubKey rsa.PublicKey) error {
 	}
 	ServerParams.ID++
 	users = append(users, user)
-	return nil
 }
 
 func GetUser(uid int) *User {
