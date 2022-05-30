@@ -134,9 +134,13 @@ func Connect(otherID string) {
 		UID:     UserParams.clientUID,
 		Payload: otherID,
 	}
-	otherPubKey := transceive(message).PublicKey
+	response := transceive(message)
+	if response.Header == INVALIDRESP {
+		fmt.Println(response.Payload)
+		return
+	}
+	otherPubKey := response.PublicKey
 	UserParams.friendList[idNum] = otherPubKey
-	fmt.Println(otherPubKey)
 }
 
 func Send(otherID string, msg string) {
