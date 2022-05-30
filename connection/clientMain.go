@@ -156,6 +156,7 @@ func Connect(otherID string) {
 	response := transceive(message)
 	if response.Header == INVALIDRESP {
 		fmt.Println(response.Payload)
+		printPadding()
 		return
 	}
 	fmt.Println("Connection successful")

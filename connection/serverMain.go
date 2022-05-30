@@ -39,7 +39,8 @@ func handleConnection(conn net.Conn) {
 	for {
 		message, err := ReceiveMessage(conn)
 		if err != nil {
-			fmt.Println("connection closed")
+			// mark user not online
+			DeleteUserByConn(conn)
 			return
 		}
 		handleMessage(message, conn)
