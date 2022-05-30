@@ -27,6 +27,10 @@ func initClient() {
 		panic("connection failed")
 	}
 	fmt.Println("Joined server with id:", UserParams.clientUID)
+	fmt.Println("Commands:")
+	fmt.Println("users - get list of all currently online users")
+	fmt.Println("conn [u] - connect with user u")
+	fmt.Println("send [u] [msg] - send msg to user u")
 	PrintPadding()
 	UserParams.friendList = make(map[int]rsa.PublicKey)
 }
@@ -55,19 +59,27 @@ func StartClient() {
 	for {
 		scanner.Scan()
 		input := scanner.Text()
-		switch input {
+		split := strings.Split(input, " ")
+		switch split[0] {
 		case "users":
 			GetUsers()
 		case "conn":
-			scanner.Scan()
-			otherID := scanner.Text()
-			Connect(otherID)
+			if len(split) == 2 {
+				otherID := split[1]
+				Connect(otherID)
+			} else {
+				fmt.Println("input error")
+				PrintPadding()
+			}
 		case "send":
-			scanner.Scan()
-			otherID := scanner.Text()
-			scanner.Scan()
-			msg := scanner.Text()
-			Send(otherID, msg)
+			if len(split) == 3 {
+				otherID := split[1]
+				msg := split[2]
+				Send(otherID, msg)
+			} else {
+				fmt.Println("input error")
+				PrintPadding()
+			}
 		}
 	}
 }
