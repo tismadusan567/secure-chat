@@ -24,6 +24,8 @@ func StartServer() {
 		fmt.Printf("startListening error: %v", err)
 		return
 	}
+	fmt.Println("Server online")
+	PrintPadding()
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
@@ -79,6 +81,7 @@ func handleJoin(message Message, conn net.Conn) {
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("server join response error")
+		PrintPadding()
 		return
 	}
 }
@@ -92,8 +95,11 @@ func handleEstablish(message Message, conn net.Conn) {
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("server establish response error")
+		PrintPadding()
 		return
 	}
+	fmt.Println("User", user.ID, "connected with address", user.Address, "on port", user.Port)
+	PrintPadding()
 }
 
 func handleUsers(message Message, conn net.Conn) {
@@ -112,8 +118,11 @@ func handleUsers(message Message, conn net.Conn) {
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("server users response error")
+		PrintPadding()
 		return
 	}
+	fmt.Println("Sending online user list to", user.ID)
+	PrintPadding()
 }
 
 func handleConnect(message Message, conn net.Conn) {
@@ -138,8 +147,11 @@ func handleConnect(message Message, conn net.Conn) {
 	err = SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("invalid response error")
+		PrintPadding()
 		return
 	}
+	fmt.Println("Sending public key of", otherUser.ID, "to", user.ID)
+	PrintPadding()
 }
 
 func handleSend(message Message, conn net.Conn) {
@@ -171,8 +183,11 @@ func handleSend(message Message, conn net.Conn) {
 	err = SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("invalid response error")
+		PrintPadding()
 		return
 	}
+	fmt.Println("Forwarding message from", user.ID, "to", otherUser.ID)
+	PrintPadding()
 }
 
 func handleInvalidRequest(conn net.Conn, s string) {
@@ -180,5 +195,6 @@ func handleInvalidRequest(conn net.Conn, s string) {
 	err := SendMessage(conn, response)
 	if err != nil {
 		fmt.Println("invalid response error")
+		PrintPadding()
 	}
 }
