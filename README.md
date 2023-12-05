@@ -16,4 +16,4 @@ To run server, run the app and press 's' when prompted.
 
 To run client, run the app and press 'c' when prompted.
 
-To change adress and port, edit the constants.go file
+To change adress and port, edit the constants.go file.
